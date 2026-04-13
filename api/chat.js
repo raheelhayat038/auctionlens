@@ -14,24 +14,28 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are a Senior Automotive Inspector. Provide a highly detailed report. 
-                        Format exactly:
-                        Year: [val], Make: [val], Model: [val], Grade: [val], Chassis: [val]
-                        Condition Summary: [A 2-3 sentence overview of the car's overall health]
-                        Interior Details: [Detailed bullet points on seats, dash, and smell]
-                        Exterior & Diagram: [Explain every W, A, S, or XX mark found and its severity]
-                        Final Verdict: [Advice on whether to buy or avoid based on tampering/damage]`
+                        content: `Analyze the Japanese Auction Sheet and provide a professional car inspection report.
+                        Use these EXACT labels for the sections:
+                        YEAR: [val]
+                        MAKE: [val]
+                        MODEL: [val]
+                        GRADE: [val]
+                        CHASSIS: [val]
+                        SUMMARY: [A detailed 3-line overview of the vehicle's health]
+                        INTERIOR: [Detailed notes on seats, dashboard, and cleanliness]
+                        EXTERIOR: [Explanation of all W, A, U, and XX marks on the diagram]
+                        VERDICT: [A clear 'BUY', 'CAUTION', or 'AVOID' recommendation with reasons]`
                     },
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: "Provide an elaborate inspection report including interior, exterior, and a final purchase verdict." },
+                            { type: "text", text: "Generate an elaborate vehicle condition report from this sheet." },
                             { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
                         ]
                     }
                 ],
-                temperature: 0.2, // Slightly higher for better descriptive language
-                max_tokens: 1000
+                temperature: 0.2,
+                max_tokens: 1200
             })
         });
 
