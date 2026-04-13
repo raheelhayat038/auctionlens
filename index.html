@@ -11,11 +11,11 @@
 
     <h1 class="text-xl font-black text-blue-500 italic uppercase mb-6 tracking-tighter">AuctionLens PK</h1>
 
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl mb-6">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl mb-4">
         <div class="relative border-2 border-dashed border-slate-800 rounded-2xl aspect-[3/4] flex items-center justify-center overflow-hidden bg-slate-950 mb-4">
             <img id="previewImg" class="absolute inset-0 w-full h-full object-contain hidden z-10">
             <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-10"></video>
-            <p id="placeholderText" class="text-slate-500 text-xs">Awaiting Sheet Scan...</p>
+            <p id="placeholderText" class="text-slate-500 text-xs text-center p-4">Align Auction Sheet within this frame</p>
             <button id="shutter" class="absolute bottom-6 z-20 w-16 h-16 bg-white rounded-full border-4 border-red-500 hidden active:scale-90 transition-transform"></button>
         </div>
         
@@ -26,46 +26,52 @@
         <button id="analyze" class="hidden w-full bg-white text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest">Process Sheet</button>
     </div>
 
+    <button id="openLegend" class="w-full max-w-md py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">📖 View Diagram Code Legend</button>
+
     <div id="result" class="hidden w-full max-w-md space-y-3 pb-10">
         <div class="bg-slate-900 rounded-3xl border border-slate-800 p-5 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-blue-500 font-bold text-[10px] uppercase tracking-widest">Inspection Report</span>
+                <span class="text-blue-500 font-bold text-[10px] uppercase tracking-widest">Expert Report</span>
                 <span id="flagStatus" class="hidden bg-red-600 text-[8px] px-2 py-0.5 rounded text-white font-bold animate-pulse">ALERT</span>
             </div>
-
+            
             <div class="grid grid-cols-3 gap-2">
                 <div class="bg-black/40 p-2 rounded-lg border border-white/5 text-center">
                     <p class="text-[7px] text-slate-500 uppercase">Year</p>
-                    <p id="resYear" class="text-xs font-bold">-</p>
+                    <p id="resYear" class="text-xs font-bold text-white">-</p>
                 </div>
                 <div class="bg-black/40 p-2 rounded-lg border border-white/5 text-center">
                     <p class="text-[7px] text-slate-500 uppercase">Grade</p>
-                    <p id="resGrade" class="text-xs font-bold">-</p>
+                    <p id="resGrade" class="text-xs font-bold text-white">-</p>
                 </div>
                 <div class="bg-black/40 p-2 rounded-lg border border-white/5 text-center">
                     <p class="text-[7px] text-slate-500 uppercase">Chassis</p>
-                    <p id="resChassis" class="text-[9px] font-bold truncate">-</p>
+                    <p id="resChassis" class="text-[9px] font-bold text-blue-400 truncate">-</p>
                 </div>
             </div>
 
-            <div class="space-y-3">
-                <div>
-                    <p class="text-[8px] text-blue-400 font-bold uppercase mb-1">Summary</p>
-                    <p id="resSummary" class="text-[11px] leading-relaxed text-slate-300"></p>
-                </div>
-                <div>
-                    <p class="text-[8px] text-emerald-400 font-bold uppercase mb-1">Interior Condition</p>
-                    <p id="resInterior" class="text-[11px] leading-relaxed text-slate-300"></p>
-                </div>
-                <div>
-                    <p class="text-[8px] text-orange-400 font-bold uppercase mb-1">Exterior Condition</p>
-                    <p id="resExterior" class="text-[11px] leading-relaxed text-slate-300"></p>
-                </div>
+            <div class="space-y-3 text-[11px] leading-relaxed text-slate-300">
+                <div><p class="text-[8px] text-blue-400 font-bold uppercase mb-1">Executive Summary</p><p id="resSummary"></p></div>
+                <div><p class="text-[8px] text-emerald-400 font-bold uppercase mb-1">Interior Notes</p><p id="resInterior"></p></div>
+                <div><p class="text-[8px] text-orange-400 font-bold uppercase mb-1">Exterior & Marks</p><p id="resExterior"></p></div>
             </div>
 
-            <div id="verdictBox" class="p-4 rounded-xl border-2 text-center">
+            <div id="verdictBox" class="p-4 rounded-xl border-2 text-center transition-all">
                 <p id="resVerdict" class="text-xs font-black uppercase tracking-wider"></p>
             </div>
+        </div>
+    </div>
+
+    <div id="legendModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-xs shadow-2xl">
+            <h3 class="text-blue-500 font-black text-xs uppercase mb-4 tracking-widest border-b border-slate-800 pb-2">Code Legend</h3>
+            <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-[10px] text-slate-300">
+                <p><b>A:</b> Scratch</p><p><b>U:</b> Dent</p>
+                <p><b>W:</b> Repaint</p><p><b>S:</b> Rust</p>
+                <p><b>C:</b> Corrosion</p><p><b>P:</b> Faded</p>
+                <p><b>XX:</b> Replaced</p><p><b>X:</b> Needs Replacement</p>
+            </div>
+            <button id="closeLegend" class="w-full mt-6 py-3 bg-white text-black font-black rounded-xl text-[10px]">CLOSE</button>
         </div>
     </div>
 
