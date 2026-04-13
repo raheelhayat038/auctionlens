@@ -6,49 +6,67 @@
     <title>AUCTIONLENS PK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #020617; } /* Deepest Navy */
+        body { background-color: #020617; }
+        /* Forces the camera to fill its container vertically */
+        #video { object-fit: cover; }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen flex flex-col items-center justify-center p-6 font-sans">
+<body class="text-slate-200 min-h-screen flex flex-col items-center p-6 font-sans">
 
-    <h1 class="text-2xl font-black text-blue-500 tracking-tighter mb-8 uppercase italic">
-        AuctionLens PK
-    </h1>
+    <h1 class="text-2xl font-black text-blue-500 tracking-tighter mb-8 uppercase italic">AuctionLens PK</h1>
 
-    <div class="w-full max-w-lg bg-slate-900/80 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-sm">
+    <div class="w-full max-w-lg bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-sm">
         
-        <div id="dropzone" class="relative group cursor-pointer border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl aspect-video flex flex-col items-center justify-center transition-all duration-300 mb-8 bg-slate-950/50">
-            
-            <img id="previewImg" class="absolute inset-0 w-full h-full object-contain rounded-2xl hidden z-10">
-            <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover rounded-2xl hidden z-10"></video>
+        <div id="dropzone" class="relative group border-2 border-dashed border-slate-700 rounded-2xl aspect-[9/16] max-h-[500px] flex flex-col items-center justify-center overflow-hidden bg-slate-950/50 mb-6">
+            <img id="previewImg" class="absolute inset-0 w-full h-full object-contain hidden z-10">
+            <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full hidden z-10"></video>
 
-            <div id="placeholderText" class="text-center space-y-2 group-hover:scale-105 transition-transform duration-300">
-                <p class="text-slate-400 text-sm font-medium">Scan or Upload</p>
-                <p class="text-slate-500 text-xs">Japanese Auction Sheet</p>
+            <div id="placeholderText" class="text-center space-y-2">
+                <p class="text-slate-400 text-sm font-medium">Scan or Upload Sheet</p>
+                <p class="text-slate-500 text-[10px]">Portrait orientation recommended</p>
             </div>
             
-            <button id="shutter" class="absolute bottom-4 z-20 w-14 h-14 bg-white rounded-full border-4 border-red-500 hidden"></button>
+            <button id="shutter" class="absolute bottom-6 z-20 w-16 h-16 bg-white rounded-full border-4 border-red-500 hidden active:scale-90 transition-transform"></button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-            <label class="flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl cursor-pointer transition-all active:scale-95 shadow-lg shadow-blue-900/20">
+        <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center justify-center bg-blue-600 hover:bg-blue-500 py-4 rounded-xl cursor-pointer font-bold text-xs transition-all">
                 UPLOAD <input type="file" id="fileIn" class="hidden" accept="image/*">
             </label>
-            <button id="btnCam" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-900/20">
-                CAMERA
-            </button>
+            <button id="btnCam" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold text-xs transition-all">CAMERA</button>
         </div>
 
-        <button id="analyze" class="hidden w-full mt-4 bg-white text-black font-black py-4 rounded-xl uppercase tracking-widest hover:bg-slate-200 transition-all">
-            Analyze Sheet
-        </button>
-
+        <button id="analyze" class="hidden w-full mt-4 bg-white text-black font-black py-4 rounded-xl uppercase tracking-widest active:scale-95 transition-all">Analyze Sheet</button>
     </div>
 
-    <div id="result" class="hidden w-full max-w-lg mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-2xl">
-            <h3 class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-4 border-b border-slate-800 pb-2">AI Inspection Report</h3>
-            <div id="outputText" class="text-sm leading-relaxed whitespace-pre-wrap text-slate-300"></div>
+    <div id="result" class="hidden w-full max-w-lg mt-8 mb-10">
+        <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-blue-500 font-black italic text-xs tracking-widest">SCAN REPORT</h2>
+                <span id="flagStatus" class="hidden bg-red-600 text-[10px] font-bold px-2 py-0.5 rounded text-white animate-pulse">POTENTIALLY TAMPERED</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
+                    <p class="text-slate-500 text-[9px] uppercase font-bold mb-1">Auction Grade</p>
+                    <p id="resGrade" class="text-3xl font-black text-white">-</p>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
+                    <p class="text-slate-500 text-[9px] uppercase font-bold mb-1">Chassis Number</p>
+                    <p id="resChassis" class="text-sm font-mono text-blue-400 truncate">-</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
+                    <p class="text-emerald-500 text-[9px] uppercase font-bold mb-2">Inspector Notes (EN / URDU)</p>
+                    <div id="resNotes" class="text-sm text-slate-300 leading-relaxed" dir="auto"></div>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
+                    <p class="text-orange-400 text-[9px] uppercase font-bold mb-2">Diagram (W, A, XX)</p>
+                    <div id="resDiagram" class="text-sm text-slate-300 italic"></div>
+                </div>
+            </div>
         </div>
     </div>
 
