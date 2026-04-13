@@ -1,82 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUCTIONLENS PK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #020617; }
-        #video { object-fit: cover; }
-    </style>
-</head>
-<body class="text-slate-200 min-h-screen flex flex-col items-center p-6 font-sans">
-
-    <h1 class="text-2xl font-black text-blue-500 tracking-tighter mb-8 uppercase italic">AuctionLens PK</h1>
-
-    <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl mb-8">
-        <div id="dropzone" class="relative border-2 border-dashed border-slate-700 rounded-2xl aspect-[9/16] max-h-[400px] flex flex-col items-center justify-center overflow-hidden bg-slate-950 mb-6">
-            <img id="previewImg" class="absolute inset-0 w-full h-full object-contain hidden z-10">
-            <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full hidden z-10"></video>
-            <div id="placeholderText" class="text-center p-4">
-                <p class="text-slate-400 text-sm font-medium">Scan or Upload Sheet</p>
-            </div>
-            <button id="shutter" class="absolute bottom-6 z-20 w-16 h-16 bg-white rounded-full border-4 border-red-500 hidden active:scale-90"></button>
+<div id="result" class="hidden w-full max-w-lg mt-8 mb-12 space-y-4">
+    <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 shadow-2xl space-y-6">
+        
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <h2 class="text-blue-500 font-black italic text-sm tracking-widest uppercase">Expert Inspection Report</h2>
+            <span id="flagStatus" class="hidden bg-red-600 text-[10px] font-black px-2 py-1 rounded text-white animate-pulse">TAMPER ALERT</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center justify-center bg-blue-600 hover:bg-blue-500 py-4 rounded-xl cursor-pointer font-bold text-xs uppercase">
-                Upload <input type="file" id="fileIn" class="hidden" accept="image/*">
-            </label>
-            <button id="btnCam" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold text-xs uppercase">Camera</button>
+        <div class="bg-blue-500/5 border border-blue-500/20 p-4 rounded-2xl">
+            <p class="text-blue-400 text-[9px] uppercase font-black mb-1 tracking-widest">Executive Summary</p>
+            <p id="resSummary" class="text-sm text-slate-200 leading-relaxed italic"></p>
         </div>
-        <button id="analyze" class="hidden w-full mt-4 bg-white text-black font-black py-4 rounded-xl uppercase tracking-widest active:scale-95 transition-all">Analyze Sheet</button>
-    </div>
 
-    <div id="result" class="hidden w-full max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-500 mb-12">
-        <div class="bg-slate-900 rounded-3xl border border-slate-800 p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h2 class="text-blue-500 font-black italic text-xs tracking-widest uppercase">Full Vehicle Report</h2>
-                <span id="flagStatus" class="hidden bg-red-600 text-[9px] font-black px-2 py-1 rounded text-white italic animate-pulse">TAMPER ALERT</span>
+        <div class="grid grid-cols-3 gap-2">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/50 text-center">
+                <p class="text-slate-500 text-[8px] uppercase font-bold mb-1">Year</p>
+                <p id="resYear" class="text-sm font-black text-white">-</p>
             </div>
-
-            <div class="grid grid-cols-3 gap-2">
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/50 text-center">
-                    <p class="text-slate-500 text-[7px] uppercase font-bold mb-1">Year</p>
-                    <p id="resYear" class="text-sm font-black text-white">-</p>
-                </div>
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/50 text-center">
-                    <p class="text-slate-500 text-[7px] uppercase font-bold mb-1">Make</p>
-                    <p id="resMake" class="text-sm font-black text-white">-</p>
-                </div>
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/50 text-center">
-                    <p class="text-slate-500 text-[7px] uppercase font-bold mb-1">Model</p>
-                    <p id="resModel" class="text-sm font-black text-white truncate">-</p>
-                </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/50 text-center">
+                <p class="text-slate-500 text-[8px] uppercase font-bold mb-1">Grade</p>
+                <p id="resGrade" class="text-sm font-black text-white">-</p>
             </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/50 text-center">
+                <p class="text-slate-500 text-[8px] uppercase font-bold mb-1">Chassis</p>
+                <p id="resChassis" class="text-[10px] font-mono text-blue-400 truncate">-</p>
+            </div>
+        </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 text-center">
-                    <p class="text-slate-500 text-[8px] uppercase font-bold mb-1">Auction Grade</p>
-                    <p id="resGrade" class="text-2xl font-black text-white">-</p>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50 text-center">
-                    <p class="text-slate-500 text-[8px] uppercase font-bold mb-1">Chassis</p>
-                    <p id="resChassis" class="text-xs font-mono text-blue-400 truncate">-</p>
-                </div>
+        <div class="space-y-4">
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
+                <p class="text-emerald-500 text-[9px] uppercase font-black mb-2 tracking-widest">Interior Condition</p>
+                <div id="resInterior" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
             </div>
 
             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
-                <p class="text-emerald-500 text-[8px] uppercase font-bold mb-2">Inspector Notes Summary</p>
-                <div id="resNotes" class="text-xs text-slate-300 leading-relaxed font-medium"></div>
-            </div>
-            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800/50">
-                <p class="text-orange-400 text-[8px] uppercase font-bold mb-2">Diagram Damage Marks</p>
-                <div id="resDiagram" class="text-xs text-slate-300 italic font-medium leading-relaxed"></div>
+                <p class="text-orange-400 text-[9px] uppercase font-black mb-2 tracking-widest">Exterior & Diagram Analysis</p>
+                <div id="resExterior" class="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap"></div>
             </div>
         </div>
-    </div>
 
-    <script src="chat.js"></script>
-</body>
-</html>
+        <div id="verdictBox" class="p-5 rounded-2xl border-2 text-center transition-colors duration-500">
+            <p class="text-[10px] uppercase font-black mb-1 opacity-70">Purchase Verdict</p>
+            <p id="resVerdict" class="text-lg font-black italic tracking-tight"></p>
+        </div>
+    </div>
+</div>
