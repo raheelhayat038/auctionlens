@@ -9,14 +9,12 @@
 <body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col items-center py-8">
 
     <div id="viewScanner" class="w-full max-w-md px-4 flex flex-col gap-6">
-        <div class="text-center">
-            <h1 class="text-blue-500 font-black text-3xl italic">AuctionLens PK</h1>
-        </div>
-
+        <h1 class="text-blue-500 font-black text-3xl italic text-center uppercase">AuctionLens PK</h1>
+        
         <div class="relative w-full aspect-[3/4] bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden">
             <video id="video" class="absolute inset-0 w-full h-full object-cover hidden" autoplay playsinline></video>
             <img id="previewImg" class="absolute inset-0 w-full h-full object-cover hidden" />
-            <div id="placeholder" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">No Image Selected</div>
+            <div id="placeholder" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">Upload Sheet</div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -25,41 +23,28 @@
             <input type="file" id="fileIn" class="hidden" accept="image/*">
         </div>
 
-        <button id="shutter" class="hidden w-full bg-white text-black font-black py-4 rounded-2xl uppercase">Take Photo</button>
-        <button id="analyze" class="hidden w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase shadow-lg">Process Sheet</button>
+        <button id="shutter" class="hidden w-full bg-white text-black font-black py-4 rounded-2xl uppercase">Capture</button>
+        <button id="analyze" class="hidden w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase">Process Sheet</button>
 
         <div id="result" class="hidden bg-slate-900 p-6 rounded-3xl border border-slate-800 mb-24">
-            <div id="verdictBox" class="p-4 rounded-xl text-center mb-4">
-                <p id="resVerdict" class="font-black italic uppercase"></p>
+            <div id="verdictBox" class="p-4 rounded-xl text-center mb-4 border border-blue-500 bg-blue-500/10 text-blue-500 font-black">
+                <p id="resVerdict">READY</p>
             </div>
-            <div class="space-y-2 text-sm">
-                <p class="text-slate-500">Year: <span id="resYear" class="text-white font-bold"></span></p>
-                <p class="text-slate-500">Grade: <span id="resGrade" class="text-white font-bold"></span></p>
-                <p class="text-slate-500">Chassis: <span id="resChassis" class="text-white font-bold"></span></p>
-                <p class="text-slate-500">Summary: <span id="resSummary" class="text-slate-300 block mt-1 text-xs"></span></p>
+            <div class="space-y-1 text-xs">
+                <p>Chassis: <span id="resChassis" class="text-white font-bold">-</span></p>
+                <p>Grade: <span id="resGrade" class="text-white font-bold">-</span></p>
             </div>
         </div>
     </div>
 
-    <div id="viewParts" class="hidden w-full max-w-md px-4 text-center pt-10">
-        <h2 class="text-emerald-500 font-black text-2xl uppercase">Part Finder</h2>
-        <p class="mt-4 text-slate-400">Identify car parts using AI. (Contact below to use)</p>
+    <div id="viewContact" class="hidden w-full max-w-md px-4 pt-10 text-center">
+        <h2 class="text-blue-500 font-black text-2xl uppercase">Contact Us</h2>
+        <p class="mt-4 text-slate-400">WhatsApp: +92 331 8484115</p>
     </div>
 
-    <div id="viewContact" class="hidden w-full max-w-md px-4 pt-10">
-        <h2 class="text-blue-500 font-black text-2xl uppercase text-center">Contact</h2>
-        <form id="leadForm" class="mt-6 space-y-4">
-            <input type="text" id="leadName" placeholder="Name" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl text-white outline-none">
-            <textarea id="leadMessage" placeholder="How can we help?" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl text-white outline-none"></textarea>
-            <button type="submit" class="w-full bg-blue-600 py-4 rounded-xl font-bold uppercase">Send WhatsApp</button>
-        </form>
-    </div>
-
-    <nav class="fixed bottom-0 inset-x-0 h-20 bg-slate-950 border-t border-slate-900 flex justify-around items-center">
-        <button onclick="show('scan')" id="navScan" class="text-blue-500 text-[10px] font-bold">SCANNER</button>
-        <button onclick="show('parts')" id="navParts" class="text-slate-500 text-[10px] font-bold">PARTS</button>
-        <a href="https://afriditrading.com/cars" class="text-slate-500 text-[10px] font-bold">AUCTIONS</a>
-        <button onclick="show('cont')" id="navCont" class="text-slate-500 text-[10px] font-bold">CONTACT</button>
+    <nav class="fixed bottom-0 inset-x-0 h-20 bg-slate-950 border-t border-slate-900 flex justify-around items-center z-50">
+        <button id="navScanner" class="text-blue-500 text-[10px] font-bold uppercase">Scanner</button>
+        <button id="navContact" class="text-slate-500 text-[10px] font-bold uppercase">Contact</button>
     </nav>
 
     <script src="chat.js"></script>
