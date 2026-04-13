@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     const { prompt } = req.body;
     // This pulls the key from Vercel's secret settings
-    const API_KEY = process.env.GEMINI_API_KEY; AIzaSyC0Kh8L5kN1NqOA5L0NfmYVlMt4uZAFnTE
+    const API_KEY = process.env.GEMINI_API_KEY; AIzaSyDaS-lGVBgWdTQ2Szi20NG4_ZmRxYapK2o
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
