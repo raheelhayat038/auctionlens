@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- ELEMENTS ---
+    // --- SETUP ---
     const nav = {
         scanBtn: document.getElementById('navScanner'),
         partsBtn: document.getElementById('navParts'),
@@ -20,12 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let activeBase64 = null;
-    const WHATSAPP_NUMBER = "923318484115";
 
-    // --- 1. NAVIGATION LOGIC ---
+    // --- NAVIGATION ---
     function switchView(activeKey) {
-        const keys = ['scan', 'parts', 'cont'];
-        keys.forEach(k => {
+        ['scan', 'parts', 'cont'].forEach(k => {
             nav[k + 'View'].classList.toggle('hidden', k !== activeKey);
             nav[k + 'Btn'].classList.toggle('text-blue-500', k === activeKey);
             nav[k + 'Btn'].classList.toggle('text-slate-500', k !== activeKey);
@@ -36,7 +34,29 @@ document.addEventListener('DOMContentLoaded', () => {
     nav.partsBtn.addEventListener('click', () => switchView('parts'));
     nav.contBtn.addEventListener('click', () => switchView('cont'));
 
-    // --- 2. SCANNER ENGINE ---
+    // --- UPLOAD LOGIC (FIXED) ---
+    scanner.fileIn.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const dataUrl = event.target.result;
+            activeBase64 = dataUrl.split(',')[1];
+            
+            // UI Updates
+            scanner.preview.src = dataUrl;
+            scanner.preview.classList.remove('hidden');
+            scanner.placeholder.classList.add('hidden');
+            scanner.video.classList.add('hidden');
+            scanner.shutter.classList.add('hidden');
+            scanner.analyze.classList.remove('hidden'); // SHOW PROCESS BUTTON
+            scanner.result.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // --- CAMERA LOGIC ---
     document.getElementById('btnCam').addEventListener('click', async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -46,36 +66,26 @@ document.addEventListener('DOMContentLoaded', () => {
             scanner.preview.classList.add('hidden');
             scanner.placeholder.classList.add('hidden');
             scanner.result.classList.add('hidden');
-        } catch (err) { alert("Enable camera access."); }
+            scanner.analyze.classList.add('hidden');
+        } catch (err) { alert("Enable camera."); }
     });
 
     scanner.shutter.addEventListener('click', () => {
         const canvas = document.createElement('canvas');
-        canvas.width = scanner.video.videoWidth; canvas.height = scanner.video.videoHeight;
+        canvas.width = scanner.video.videoWidth; 
+        canvas.height = scanner.video.videoHeight;
         canvas.getContext('2d').drawImage(scanner.video, 0, 0);
-        activeBase64 = canvas.toDataURL('image/png').split(',')[1];
-        scanner.preview.src = canvas.toDataURL('image/png');
-        scanner.video.classList.add('hidden');
+        const dataUrl = canvas.toDataURL('image/png');
+        activeBase64 = dataUrl.split(',')[1];
+        scanner.preview.src = dataUrl;
         scanner.preview.classList.remove('hidden');
+        scanner.video.classList.add('hidden');
         scanner.shutter.classList.add('hidden');
         scanner.analyze.classList.remove('hidden');
         scanner.video.srcObject.getTracks().forEach(t => t.stop());
     });
 
-    scanner.fileIn.addEventListener('change', (e) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            activeBase64 = ev.target.result.split(',')[1];
-            scanner.preview.src = ev.target.result;
-            scanner.preview.classList.remove('hidden');
-            scanner.analyze.classList.remove('hidden');
-            scanner.placeholder.classList.add('hidden');
-            scanner.result.classList.add('hidden');
-        };
-        reader.readAsDataURL(e.target.files[0]);
-    });
-
-    // --- 3. AI ANALYSIS ---
+    // --- AI LOGIC ---
     scanner.analyze.addEventListener('click', async () => {
         scanner.analyze.innerText = "PROCESSING...";
         scanner.analyze.disabled = true;
@@ -100,28 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('resInterior').innerText = extract("INTERIOR");
                 document.getElementById('resSummary').innerText = extract("SUMMARY");
 
-                // Style Verdict Box Color
+                // Verdict Color Logic
                 const isBad = txt.toUpperCase().includes("AVOID");
                 document.getElementById('verdictBox').className = isBad ? 
-                    "p-4 rounded-xl border-2 border-red-600 bg-red-900/10 text-red-500 text-center mb-4" : 
-                    "p-4 rounded-xl border-2 border-emerald-600 bg-emerald-900/10 text-emerald-500 text-center mb-4";
+                    "p-4 rounded-xl border-2 border-red-600 bg-red-900/10 text-red-500 text-center" : 
+                    "p-4 rounded-xl border-2 border-emerald-600 bg-emerald-900/10 text-emerald-500 text-center";
 
                 scanner.result.classList.remove('hidden');
                 window.scrollTo({ top: scanner.result.offsetTop, behavior: 'smooth' });
             }
-        } catch (err) { alert("AI Error."); }
-        finally { scanner.analyze.innerText = "PROCESS SHEET"; scanner.analyze.disabled = false; }
-    });
-
-    // --- 4. WHATSAPP & FORMS ---
-    document.getElementById('whatsappReport').addEventListener('click', () => {
-        const msg = `*Report Review Request*%0AYear: ${document.getElementById('resYear').innerText}%0AGrade: ${document.getElementById('resGrade').innerText}%0AChassis: ${document.getElementById('resChassis').innerText}`;
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
-    });
-
-    document.getElementById('leadForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = `*New Inquiry*%0AName: ${document.getElementById('leadName').value}%0AInquiry: ${document.getElementById('leadMessage').value}`;
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank');
+        } catch (err) { alert("Connection error."); }
+        finally { scanner.analyze.innerText = "PROCESS IMAGE"; scanner.analyze.disabled = false; }
     });
 });
