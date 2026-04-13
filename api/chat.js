@@ -1,7 +1,16 @@
 export default async function handler(req, res) {
+    // Vercel only allows POST for this specific logic
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: "Method not allowed" });
+    }
+
     try {
         const { image, mimeType } = req.body;
         const API_KEY = process.env.GROQ_API_KEY;
+
+        if (!API_KEY) {
+            return res.status(500).json({ error: "Server Configuration Error: API Key missing" });
+        }
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
@@ -10,25 +19,22 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "meta-llama/llama-4-scout-17b-16e-instruct", 
+                model: "llama-3.2-11b-vision-preview", // Use this for 100% stability on Vercel
                 messages: [
                     {
                         role: "system",
-                        content: "You are a data extractor. Extract data from Japanese auction sheets into short, 1-3 word bullet points. No conversational text."
+                        content: "Return ONLY: MODEL, GRADE, CHASSIS, and DAMAGE in short bullet points. No conversational text."
                     },
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: "MODEL, GRADE, CHASSIS, DAMAGE." },
-                            {
-                                type: "image_url",
-                                image_url: { url: `data:${mimeType};base64,${image}` }
-                            }
+                            { type: "text", text: "Extract data from this sheet." },
+                            { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
                         ]
                     }
                 ],
-                temperature: 0.0, // Absolute consistency
-                max_tokens: 150   // Limits the response length physically
+                temperature: 0,
+                max_tokens: 150
             })
         });
 
@@ -43,7 +49,6 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error("Backend Error:", error);
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: "Vercel Function Error: " + error.message });
     }
 }
