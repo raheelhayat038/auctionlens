@@ -3,58 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 1.5 Flash Test</title>
+    <title>Gemini 1.5 Flash AI</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-        #output { background: #f4f4f4; padding: 15px; border-radius: 8px; white-space: pre-wrap; margin-top: 20px; border: 1px solid #ddd; }
-        button { padding: 10px 20px; background-color: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:disabled { background-color: #ccc; }
-        input { padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f0f2f5; display: flex; justify-content: center; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        h2 { color: #1a73e8; margin-top: 0; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        input:focus { border-color: #4285f4; }
+        button { padding: 12px 20px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #3367d6; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #output { background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; min-height: 50px; white-space: pre-wrap; line-height: 1.5; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <h2>Gemini 1.5 Flash AI</h2>
-    <input type="text" id="promptInput" placeholder="Enter your question here..." value="Explain quantum physics to a cat.">
-    <button id="submitBtn">Ask Gemini</button>
-
+    <div class="input-group">
+        <input type="text" id="promptInput" placeholder="Ask something..." value="Explain gravity like I'm five.">
+        <button id="submitBtn">Ask Gemini</button>
+    </div>
     <div id="output">Response will appear here...</div>
+</div>
 
-    <script type="module">
-        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+<script>
+    const btn = document.getElementById('submitBtn');
+    const output = document.getElementById('output');
+    const input = document.getElementById('promptInput');
 
-        // --- CONFIGURATION ---
-        const API_KEY = "AIzaSyC0Kh8L5kN1NqOA5L0NfmYVlMt4uZAFnTE"; // Replace with your real key
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        
-        // Using the stable model name
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    btn.addEventListener('click', async () => {
+        const prompt = input.value;
+        if(!prompt) return;
 
-        const btn = document.getElementById('submitBtn');
-        const output = document.getElementById('output');
-        const input = document.getElementById('promptInput');
+        btn.disabled = true;
+        output.innerText = "Connecting to backend...";
 
-        btn.addEventListener('click', async () => {
-            const prompt = input.value;
-            if (!prompt) return;
+        try {
+            // This calls the Vercel Serverless Function we are about to create
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
 
-            btn.disabled = true;
-            output.innerText = "Thinking...";
-
-            try {
-                // generateContent is the standard method for v1 and v1beta
-                const result = await model.generateContent(prompt);
-                const response = await result.response;
-                const text = response.text();
-                
+            const data = await response.json();
+            
+            if (data.error) {
+                output.innerText = "Error: " + data.error;
+            } else {
+                // Navigate the JSON response from Gemini
+                const text = data.candidates[0].content.parts[0].text;
                 output.innerText = text;
-            } catch (error) {
-                console.error(error);
-                output.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
-            } finally {
-                btn.disabled = false;
             }
-        });
-    </script>
+        } catch (err) {
+            output.innerText = "Failed to connect to backend. Make sure you deployed the /api folder.";
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+
 </body>
 </html>
