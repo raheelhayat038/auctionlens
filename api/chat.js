@@ -11,7 +11,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Missing image data" });
         }
 
-        const API_KEY = process.env.GROQ_API_KEY;
+        const API_KEY = process.env.GROQ_API_KEY;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
 
         if (!API_KEY) {
             return res.status(500).json({ error: "API key not configured" });
