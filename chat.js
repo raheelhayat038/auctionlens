@@ -1,8 +1,54 @@
-// ... existing camera/file logic ...
+const video = document.getElementById('video');
+const previewImg = document.getElementById('previewImg');
+const resultDiv = document.getElementById('result');
+const analyzeBtn = document.getElementById('analyze');
+const shutterBtn = document.getElementById('shutter');
+
+let activeBase64 = null;
+let activeMime = "image/png";
+
+// Camera Logic
+document.getElementById('btnCam').addEventListener('click', async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = stream;
+        video.classList.remove('hidden');
+        previewImg.classList.add('hidden');
+        shutterBtn.classList.remove('hidden');
+        document.getElementById('placeholderText').classList.add('hidden');
+        analyzeBtn.classList.add('hidden');
+    } catch (err) { alert("Camera Access Error"); }
+});
+
+shutterBtn.addEventListener('click', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    activeBase64 = canvas.toDataURL('image/png').split(',')[1];
+    previewImg.src = canvas.toDataURL('image/png');
+    video.classList.add('hidden');
+    previewImg.classList.remove('hidden');
+    shutterBtn.classList.add('hidden');
+    analyzeBtn.classList.remove('hidden');
+    video.srcObject.getTracks().forEach(t => t.stop());
+});
+
+document.getElementById('fileIn').addEventListener('change', (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        activeBase64 = ev.target.result.split(',')[1];
+        previewImg.src = ev.target.result;
+        previewImg.classList.remove('hidden');
+        analyzeBtn.classList.remove('hidden');
+        document.getElementById('placeholderText').classList.add('hidden');
+    };
+    reader.readAsDataURL(e.target.files[0]);
+});
 
 analyzeBtn.addEventListener('click', async () => {
     resultDiv.classList.add('hidden');
-    analyzeBtn.innerText = "EXTRACTING DATA...";
+    analyzeBtn.innerText = "EXTRACTING...";
     analyzeBtn.disabled = true;
 
     try {
@@ -16,24 +62,25 @@ analyzeBtn.addEventListener('click', async () => {
         if (res.ok) {
             const txt = data.result;
             
-            // Map NEW fields to UI
-            document.getElementById('resYear').innerText = txt.match(/Year:\s*([^\n,]+)/i)?.[1] || "-";
-            document.getElementById('resMake').innerText = txt.match(/Make:\s*([^\n,]+)/i)?.[1] || "-";
-            document.getElementById('resModel').innerText = txt.match(/Model:\s*([^\n,]+)/i)?.[1] || "-";
-            
-            // Existing fields
+            // Populate all tiles
+            document.getElementById('resYear').innerText = txt.match(/Year:\s*([^\n,]+)/i)?.[1] || "N/A";
+            document.getElementById('resMake').innerText = txt.match(/Make:\s*([^\n,]+)/i)?.[1] || "N/A";
+            document.getElementById('resModel').innerText = txt.match(/Model:\s*([^\n,]+)/i)?.[1] || "N/A";
             document.getElementById('resGrade').innerText = txt.match(/Grade:\s*([^\n,]+)/i)?.[1] || "N/A";
             document.getElementById('resChassis').innerText = txt.match(/Chassis:\s*([^\n,]+)/i)?.[1] || "N/A";
-            document.getElementById('resNotes').innerText = txt.match(/Notes:\s*([^\n,]+)/i)?.[1] || "No summary available";
-            document.getElementById('resDiagram').innerText = txt.match(/Diagram:\s*([^\n,]+)/i)?.[1] || "None detected";
+            document.getElementById('resNotes').innerText = txt.match(/Notes:\s*([^\n,]+)/i)?.[1] || "No notes available.";
+            document.getElementById('resDiagram').innerText = txt.match(/Diagram:\s*([^\n,]+)/i)?.[1] || "None detected.";
 
-            const flag = document.getElementById('flagStatus');
-            txt.includes("POTENTIALLY TAMPERED") ? flag.classList.remove('hidden') : flag.classList.add('hidden');
+            if (txt.includes("POTENTIALLY TAMPERED")) {
+                document.getElementById('flagStatus').classList.remove('hidden');
+            } else {
+                document.getElementById('flagStatus').classList.add('hidden');
+            }
 
             resultDiv.classList.remove('hidden');
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
-    } catch (err) { alert("Network Error"); }
+    } catch (err) { alert("API Connection Failed"); }
     finally {
         analyzeBtn.innerText = "ANALYZE SHEET";
         analyzeBtn.disabled = false;
