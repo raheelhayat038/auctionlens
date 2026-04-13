@@ -29,6 +29,12 @@
     <button id="openLegend" class="w-full max-w-md py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">📖 View Diagram Code Legend</button>
 
     <div id="result" class="hidden w-full max-w-md space-y-3 pb-10">
+        <button id="downloadBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-2xl mb-2 flex items-center justify-center gap-2 border border-slate-700 transition-all active:scale-95">
+    <span>📥 Save Report as Image</span>
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="features.js"></script>
         <div class="bg-slate-900 rounded-3xl border border-slate-800 p-5 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <span class="text-blue-500 font-bold text-[10px] uppercase tracking-widest">Expert Report</span>
