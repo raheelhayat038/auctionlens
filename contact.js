@@ -1,39 +1,26 @@
-// --- CONTACT & NAVIGATION LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const btnScan = document.getElementById('navScanner');
+    const btnCont = document.getElementById('navContact');
+    const viewScan = document.getElementById('viewScanner');
+    const viewCont = document.getElementById('viewContact');
 
-const scannerView = document.getElementById('viewScanner');
-const contactView = document.getElementById('viewContact');
-const navScan = document.getElementById('navScanner');
-const navCon = document.getElementById('navContact');
+    // Toggle to Contact Page
+    if (btnCont && viewCont && viewScan) {
+        btnCont.addEventListener('click', () => {
+            viewScan.classList.add('hidden');
+            viewCont.classList.remove('hidden');
+            btnCont.classList.add('text-blue-500');
+            btnScan.classList.remove('text-blue-500');
+        });
+    }
 
-// Tab Switching
-navScan.addEventListener('click', () => {
-    scannerView.classList.remove('hidden');
-    contactView.classList.add('hidden');
-    navScan.classList.add('text-blue-500');
-    navCon.classList.remove('text-blue-500');
-});
-
-navCon.addEventListener('click', () => {
-    scannerView.classList.add('hidden');
-    contactView.classList.remove('hidden');
-    navCon.classList.add('text-blue-500');
-    navScan.classList.remove('text-blue-500');
-});
-
-// Form Submission to WhatsApp
-document.getElementById('leadForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('leadName').value;
-    const phone = document.getElementById('leadPhone').value;
-    const message = document.getElementById('leadMessage').value;
-    
-    const adminNumber = "923318484115"; // YOUR NUMBER
-    
-    const waText = `*NEW INQUIRY FROM AUCTIONLENS*%0A%0A` +
-                   `*Name:* ${name}%0A` +
-                   `*Phone:* ${phone}%0A` +
-                   `*Message:* ${message}`;
-                   
-    window.open(`https://wa.me/${adminNumber}?text=${waText}`, '_blank');
+    // Toggle back to Scanner
+    if (btnScan && viewScan && viewCont) {
+        btnScan.addEventListener('click', () => {
+            viewCont.classList.add('hidden');
+            viewScan.classList.remove('hidden');
+            btnScan.classList.add('text-blue-500');
+            btnCont.classList.remove('text-blue-500');
+        });
+    }
 });
