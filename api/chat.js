@@ -1,97 +1,54 @@
-const video = document.getElementById('video');
-const fileInput = document.getElementById('fileInput');
-const imagePreview = document.getElementById('imagePreview');
-const previewContainer = document.getElementById('previewContainer');
-const cameraContainer = document.getElementById('cameraContainer');
-const aiResponse = document.getElementById('aiResponse');
-const resultBox = document.getElementById('resultBox');
+export default async function handler(req, res) {
+    // Safety check for method
+    if (req.method !== 'POST') return res.status(405).json({ error: "Method Not Allowed" });
 
-let capturedBase64 = null;
-let mimeType = "image/png";
-
-// --- CAMERA LOGIC ---
-document.getElementById('openCamera').addEventListener('click', async () => {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment" } // Prefers back camera on phones
-        });
-        video.srcObject = stream;
-        cameraContainer.classList.remove('hidden');
-        previewContainer.classList.add('hidden');
-    } catch (err) {
-        alert("Camera access denied or not available.");
-        console.error(err);
-    }
-});
+        const { image, mimeType } = req.body;
+        if (!image) return res.status(400).json({ error: "Missing image data" });
 
-document.getElementById('captureBtn').addEventListener('click', () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    
-    capturedBase64 = canvas.toDataURL('image/png').split(',')[1];
-    mimeType = "image/png";
-    
-    imagePreview.src = canvas.toDataURL('image/png');
-    showPreview();
-    stopCamera();
-});
+        const API_KEY = process.env.GROQ_API_KEY;
 
-// --- FILE UPLOAD LOGIC ---
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    mimeType = file.type;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        imagePreview.src = event.target.result;
-        capturedBase64 = event.target.result.split(',')[1];
-        showPreview();
-    };
-    reader.readAsDataURL(file);
-});
-
-// --- UI HELPERS ---
-function showPreview() {
-    previewContainer.classList.remove('hidden');
-    cameraContainer.classList.add('hidden');
-    resultBox.classList.add('hidden');
-}
-
-function stopCamera() {
-    if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-    }
-}
-
-// --- API CALL ---
-document.getElementById('analyzeBtn').addEventListener('click', async () => {
-    if (!capturedBase64) return;
-
-    // Show loading state
-    resultBox.classList.remove('hidden');
-    aiResponse.innerHTML = `<span class="animate-pulse">Analyzing auction sheet... please wait...</span>`;
-    
-    try {
-        const response = await fetch('/api/chat', { // Points to your Node.js handler
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                image: capturedBase64,
-                mimeType: mimeType
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-4-scout-17b-16e-instruct", // Flagship 2026 Vision Model
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { 
+                                type: "text", 
+                                text: "Analyze this Japanese auction sheet. Extract Auction Grade, Chassis Number, Interior/Exterior condition, and any major damage/rust risks." 
+                            },
+                            {
+                                type: "image_url",
+                                image_url: { url: `data:${mimeType};base64,${image}` }
+                            }
+                        ]
+                    }
+                ],
+                temperature: 0.1, // Forces accuracy over creativity
+                max_tokens: 1024
             })
         });
 
         const data = await response.json();
 
-        if (response.ok) {
-            aiResponse.textContent = data.result;
-        } else {
-            aiResponse.innerHTML = `<span class="text-red-400">Error: ${data.error}</span>`;
+        if (!response.ok) {
+            console.error("Groq Error:", data);
+            return res.status(response.status).json({ error: data.error?.message || "Groq API failed" });
         }
-    } catch (err) {
-        aiResponse.innerHTML = `<span class="text-red-400">Server Error: Could not connect to backend.</span>`;
+
+        return res.status(200).json({
+            result: data.choices?.[0]?.message?.content || "No analysis provided."
+        });
+
+    } catch (error) {
+        console.error("Server Crash:", error);
+        return res.status(500).json({ error: "Internal Server Error: " + error.message });
     }
-});
+}
