@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         const { image, mimeType } = req.body;
         const API_KEY = process.env.GROQ_API_KEY;
 
-        if (!API_KEY) return res.status(500).json({ error: "API Key missing in Vercel" });
+        if (!API_KEY) return res.status(500).json({ error: "API Key missing in Vercel settings" });
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
@@ -14,18 +14,21 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                // Using Llama-3-70b-vision as it is the current stable flagship
-                model: "llama-3.2-90b-vision-preview", 
+                // NEW 2026 FLAGSHIP VISION MODEL
+                model: "meta-llama/llama-4-scout-17b-16e-instruct", 
                 messages: [
                     {
                         role: "system",
-                        content: "Return ONLY: MODEL, GRADE, CHASSIS, and DAMAGE in 1-3 word bullet points. No conversational text."
+                        content: "You are a specialized Japanese Auction Sheet extractor. Return ONLY: MODEL, GRADE, CHASSIS, and DAMAGE in 1-3 word bullet points. No chat, no intro."
                     },
                     {
                         role: "user",
                         content: [
                             { type: "text", text: "Extract auction sheet data." },
-                            { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
+                            {
+                                type: "image_url",
+                                image_url: { url: `data:${mimeType};base64,${image}` }
+                            }
                         ]
                     }
                 ],
@@ -37,10 +40,6 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
-            // Check if model was decommissioned again
-            if (data.error?.message?.includes('decommissioned')) {
-                return res.status(400).json({ error: "Groq updated their models. Please check documentation for the newest Vision ID." });
-            }
             return res.status(response.status).json({ error: data.error?.message || "Groq Error" });
         }
 
