@@ -10,15 +10,15 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: "Extract auction data. FORMAT: YEAR: [val], GRADE: [val], CHASSIS: [val], SUMMARY: [1 concise paragraph], INTERIOR: [1 concise paragraph], EXTERIOR: [1 concise paragraph], VERDICT: [BUY, CAUTION, or AVOID with 1 reason]."
+                        content: "You are an Auction Expert. Extract data precisely. FORMAT: YEAR: [val], GRADE: [val], CHASSIS: [val], SUMMARY: [1 concise paragraph], INTERIOR: [1 concise paragraph], EXTERIOR: [1 concise paragraph], VERDICT: [BUY, CAUTION, or AVOID with 1 reason]."
                     },
                     {
                         role: "user",
-                        content: [{ type: "text", text: "Analyze sheet. Keep summaries to one paragraph only." }, { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }]
+                        content: [{ type: "text", text: "Analyze the uploaded auction sheet. Be concise." }, { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }]
                     }
                 ],
                 temperature: 0.1,
-                max_tokens: 500
+                max_tokens: 600
             })
         });
         const data = await response.json();
