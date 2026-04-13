@@ -1,94 +1,76 @@
+// Global navigation function
+function show(view) {
+    const views = { scan: 'viewScanner', parts: 'viewParts', cont: 'viewContact' };
+    const navs = { scan: 'navScan', parts: 'navParts', cont: 'navCont' };
+
+    Object.keys(views).forEach(k => {
+        document.getElementById(views[k]).classList.add('hidden');
+        document.getElementById(navs[k]).classList.replace('text-blue-500', 'text-slate-500');
+    });
+
+    document.getElementById(views[view]).classList.remove('hidden');
+    document.getElementById(navs[view]).classList.replace('text-slate-500', 'text-blue-500');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    // --- SETUP ---
-    const nav = {
-        scanBtn: document.getElementById('navScanner'),
-        partsBtn: document.getElementById('navParts'),
-        contBtn: document.getElementById('navContact'),
-        scanView: document.getElementById('viewScanner'),
-        partsView: document.getElementById('viewParts'),
-        contView: document.getElementById('viewContact')
-    };
-
-    const scanner = {
-        video: document.getElementById('video'),
-        preview: document.getElementById('previewImg'),
-        fileIn: document.getElementById('fileIn'),
-        shutter: document.getElementById('shutter'),
-        analyze: document.getElementById('analyze'),
-        result: document.getElementById('result'),
-        placeholder: document.getElementById('placeholderText')
-    };
-
+    const fileIn = document.getElementById('fileIn');
+    const preview = document.getElementById('previewImg');
+    const analyzeBtn = document.getElementById('analyze');
+    const video = document.getElementById('video');
+    const shutter = document.getElementById('shutter');
     let activeBase64 = null;
 
-    // --- NAVIGATION ---
-    function switchView(activeKey) {
-        ['scan', 'parts', 'cont'].forEach(k => {
-            nav[k + 'View'].classList.toggle('hidden', k !== activeKey);
-            nav[k + 'Btn'].classList.toggle('text-blue-500', k === activeKey);
-            nav[k + 'Btn'].classList.toggle('text-slate-500', k !== activeKey);
-        });
-    }
+    // --- GALLERY FIX ---
+    document.getElementById('btnGallery').addEventListener('click', () => fileIn.click());
 
-    nav.scanBtn.addEventListener('click', () => switchView('scan'));
-    nav.partsBtn.addEventListener('click', () => switchView('parts'));
-    nav.contBtn.addEventListener('click', () => switchView('cont'));
-
-    // --- UPLOAD LOGIC (FIXED) ---
-    scanner.fileIn.addEventListener('change', function(e) {
+    fileIn.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(event) {
-            const dataUrl = event.target.result;
-            activeBase64 = dataUrl.split(',')[1];
-            
-            // UI Updates
-            scanner.preview.src = dataUrl;
-            scanner.preview.classList.remove('hidden');
-            scanner.placeholder.classList.add('hidden');
-            scanner.video.classList.add('hidden');
-            scanner.shutter.classList.add('hidden');
-            scanner.analyze.classList.remove('hidden'); // SHOW PROCESS BUTTON
-            scanner.result.classList.add('hidden');
+        reader.onload = (event) => {
+            activeBase64 = event.target.result.split(',')[1];
+            preview.src = event.target.result;
+            preview.classList.remove('hidden');
+            document.getElementById('placeholder').classList.add('hidden');
+            video.classList.add('hidden');
+            shutter.classList.add('hidden');
+            analyzeBtn.classList.remove('hidden'); // This reveals the Process button
+            document.getElementById('result').classList.add('hidden');
         };
         reader.readAsDataURL(file);
     });
 
-    // --- CAMERA LOGIC ---
+    // --- CAMERA ENGINE ---
     document.getElementById('btnCam').addEventListener('click', async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            scanner.video.srcObject = stream;
-            scanner.video.classList.remove('hidden');
-            scanner.shutter.classList.remove('hidden');
-            scanner.preview.classList.add('hidden');
-            scanner.placeholder.classList.add('hidden');
-            scanner.result.classList.add('hidden');
-            scanner.analyze.classList.add('hidden');
-        } catch (err) { alert("Enable camera."); }
+            video.srcObject = stream;
+            video.classList.remove('hidden');
+            shutter.classList.remove('hidden');
+            preview.classList.add('hidden');
+            document.getElementById('placeholder').classList.add('hidden');
+            analyzeBtn.classList.add('hidden');
+        } catch (err) { alert("Camera Error"); }
     });
 
-    scanner.shutter.addEventListener('click', () => {
+    shutter.addEventListener('click', () => {
         const canvas = document.createElement('canvas');
-        canvas.width = scanner.video.videoWidth; 
-        canvas.height = scanner.video.videoHeight;
-        canvas.getContext('2d').drawImage(scanner.video, 0, 0);
-        const dataUrl = canvas.toDataURL('image/png');
-        activeBase64 = dataUrl.split(',')[1];
-        scanner.preview.src = dataUrl;
-        scanner.preview.classList.remove('hidden');
-        scanner.video.classList.add('hidden');
-        scanner.shutter.classList.add('hidden');
-        scanner.analyze.classList.remove('hidden');
-        scanner.video.srcObject.getTracks().forEach(t => t.stop());
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        activeBase64 = canvas.toDataURL('image/png').split(',')[1];
+        preview.src = canvas.toDataURL('image/png');
+        preview.classList.remove('hidden');
+        video.classList.add('hidden');
+        shutter.classList.add('hidden');
+        analyzeBtn.classList.remove('hidden');
+        video.srcObject.getTracks().forEach(t => t.stop());
     });
 
-    // --- AI LOGIC ---
-    scanner.analyze.addEventListener('click', async () => {
-        scanner.analyze.innerText = "PROCESSING...";
-        scanner.analyze.disabled = true;
+    // --- AI ANALYSIS ---
+    analyzeBtn.addEventListener('click', async () => {
+        analyzeBtn.innerText = "WAIT...";
+        analyzeBtn.disabled = true;
         try {
             const res = await fetch('/api/chat', {
                 method: 'POST',
@@ -96,30 +78,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ image: activeBase64, mimeType: "image/png" })
             });
             const data = await res.json();
-            if (res.ok) {
-                const txt = data.result;
-                const extract = (label) => {
-                    const regex = new RegExp(`${label}:\\s*([\\s\\S]*?)(?=\\n[A-Z\\s]+:|$)`, 'i');
-                    return txt.match(regex)?.[1]?.trim() || "-";
-                };
+            const txt = data.result;
 
-                document.getElementById('resVerdict').innerText = extract("VERDICT");
-                document.getElementById('resYear').innerText = extract("YEAR");
-                document.getElementById('resGrade').innerText = extract("GRADE");
-                document.getElementById('resChassis').innerText = extract("CHASSIS");
-                document.getElementById('resInterior').innerText = extract("INTERIOR");
-                document.getElementById('resSummary').innerText = extract("SUMMARY");
+            const extract = (tag) => {
+                const reg = new RegExp(`${tag}:\\s*([\\s\\S]*?)(?=\\n[A-Z]+:|$)`, 'i');
+                return txt.match(reg)?.[1]?.trim() || "-";
+            };
 
-                // Verdict Color Logic
-                const isBad = txt.toUpperCase().includes("AVOID");
-                document.getElementById('verdictBox').className = isBad ? 
-                    "p-4 rounded-xl border-2 border-red-600 bg-red-900/10 text-red-500 text-center" : 
-                    "p-4 rounded-xl border-2 border-emerald-600 bg-emerald-900/10 text-emerald-500 text-center";
+            document.getElementById('resVerdict').innerText = extract("VERDICT");
+            document.getElementById('resYear').innerText = extract("YEAR");
+            document.getElementById('resGrade').innerText = extract("GRADE");
+            document.getElementById('resChassis').innerText = extract("CHASSIS");
+            document.getElementById('resSummary').innerText = extract("SUMMARY");
 
-                scanner.result.classList.remove('hidden');
-                window.scrollTo({ top: scanner.result.offsetTop, behavior: 'smooth' });
-            }
-        } catch (err) { alert("Connection error."); }
-        finally { scanner.analyze.innerText = "PROCESS IMAGE"; scanner.analyze.disabled = false; }
+            // Style Verdict
+            const isBad = txt.toUpperCase().includes("AVOID");
+            document.getElementById('verdictBox').className = isBad ? 
+                "p-4 rounded-xl bg-red-900/20 border border-red-500 text-red-500 text-center mb-4" : 
+                "p-4 rounded-xl bg-emerald-900/20 border border-emerald-500 text-emerald-500 text-center mb-4";
+
+            document.getElementById('result').classList.remove('hidden');
+        } catch (e) { alert("Error"); }
+        finally { analyzeBtn.innerText = "PROCESS SHEET"; analyzeBtn.disabled = false; }
     });
 });
