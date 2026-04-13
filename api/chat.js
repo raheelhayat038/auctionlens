@@ -14,28 +14,28 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: `Analyze the Japanese Auction Sheet and provide a professional car inspection report.
-                        Use these EXACT labels for the sections:
+                        content: `You are an expert Auction Inspector. Extract data and provide SHORT, 1-paragraph descriptions.
+                        FORMAT EXACTLY:
                         YEAR: [val]
                         MAKE: [val]
                         MODEL: [val]
                         GRADE: [val]
                         CHASSIS: [val]
-                        SUMMARY: [A detailed 3-line overview of the vehicle's health]
-                        INTERIOR: [Detailed notes on seats, dashboard, and cleanliness]
-                        EXTERIOR: [Explanation of all W, A, U, and XX marks on the diagram]
-                        VERDICT: [A clear 'BUY', 'CAUTION', or 'AVOID' recommendation with reasons]`
+                        SUMMARY: [One concise paragraph of overall condition]
+                        INTERIOR: [One concise paragraph listing key cabin flaws]
+                        EXTERIOR: [One concise paragraph explaining diagram marks]
+                        VERDICT: [One short sentence: BUY, CAUTION, or AVOID]`
                     },
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: "Generate an elaborate vehicle condition report from this sheet." },
+                            { type: "text", text: "Analyze this sheet. Keep every section to exactly one paragraph. No bullet points." },
                             { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
                         ]
                     }
                 ],
-                temperature: 0.2,
-                max_tokens: 1200
+                temperature: 0.1,
+                max_tokens: 500 // Lowered to force conciseness
             })
         });
 
