@@ -85,52 +85,29 @@
     </div>
 
     <script src="chat.js"></script>
-
-<div id="viewContact" class="hidden w-full max-w-md pb-24 px-4 mx-auto">
-    <div class="text-center mb-8">
-        <h2 class="text-blue-500 font-black italic text-2xl uppercase tracking-tighter">Get a Quote</h2>
-        <p class="text-slate-400 text-xs mt-2">Looking for a specific car? Let our experts find it for you.</p>
+<div **id="viewScanner"** class="w-full max-w-md px-4">
     </div>
 
-    <form id="leadForm" class="space-y-4">
-        <div>
-            <label for="leadName" class="text-[10px] text-slate-500 font-bold uppercase ml-2">Full Name</label>
-            <input type="text" id="leadName" name="leadName" required placeholder="Enter your name" 
-                   class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none transition-all text-white">
-        </div>
-        
-        <div>
-            <label for="leadPhone" class="text-[10px] text-slate-500 font-bold uppercase ml-2">WhatsApp Number</label>
-            <input type="tel" id="leadPhone" name="leadPhone" required placeholder="03XX XXXXXXX" 
-                   class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none transition-all text-white">
-        </div>
-
-        <div>
-            <label for="leadMessage" class="text-[10px] text-slate-500 font-bold uppercase ml-2">Interested Car / Budget</label>
-            <textarea id="leadMessage" name="leadMessage" rows="3" placeholder="e.g. Toyota Aqua 2018, Budget 45 Lacs" 
-                      class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none transition-all text-white"></textarea>
-        </div>
-
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl uppercase tracking-widest shadow-lg shadow-blue-900/20 transition-all active:scale-95">
-            Send Inquiry
-        </button>
+<div **id="viewContact"** class="hidden w-full max-w-md pb-24 px-4 mx-auto">
+    <h2 class="text-blue-500 font-black italic text-2xl uppercase">Get a Quote</h2>
+    <form **id="leadForm"** class="space-y-4">
+        <input type="text" **id="leadName"** required placeholder="Name" class="...">
+        <input type="tel" **id="leadPhone"** required placeholder="Phone" class="...">
+        <textarea **id="leadMessage"** placeholder="Message" class="..."></textarea>
+        <button type="submit" class="...">Send Inquiry</button>
     </form>
 </div>
 
 <nav class="fixed bottom-0 left-0 right-0 h-16 bg-slate-950 border-t border-slate-900 flex justify-around items-center z-50">
-    <button id="navScanner" class="flex flex-col items-center gap-1 text-blue-500">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Scanner</span>
+    <button **id="navScanner"** class="flex flex-col items-center gap-1 text-blue-500">
+        <span class="text-[8px] font-bold uppercase">Scanner</span>
     </button>
     
     <a href="https://afriditrading.com/cars" target="_blank" class="flex flex-col items-center gap-1 text-slate-500">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Auctions</span>
+        <span class="text-[8px] font-bold uppercase">Auctions</span>
     </a>
     
-    <button id="navContact" class="flex flex-col items-center gap-1 text-slate-500">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Contact</span>
+    <button **id="navContact"** class="flex flex-col items-center gap-1 text-slate-500">
+        <span class="text-[8px] font-bold uppercase">Contact</span>
     </button>
 </nav>
-<script src="chat.js"></script>
