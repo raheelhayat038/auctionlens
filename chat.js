@@ -7,7 +7,7 @@ const shutterBtn = document.getElementById('shutter');
 let activeBase64 = null;
 let activeMime = "image/png";
 
-// Camera Logic (Portrait)
+// Camera Initialization
 document.getElementById('btnCam').addEventListener('click', async () => {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -19,9 +19,11 @@ document.getElementById('btnCam').addEventListener('click', async () => {
         shutterBtn.classList.remove('hidden');
         document.getElementById('placeholderText').classList.add('hidden');
         analyzeBtn.classList.add('hidden');
-    } catch (err) { alert("Camera Error"); }
+        resultDiv.classList.add('hidden');
+    } catch (err) { alert("Camera Access Error"); }
 });
 
+// Capture
 shutterBtn.addEventListener('click', () => {
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
@@ -36,6 +38,7 @@ shutterBtn.addEventListener('click', () => {
     video.srcObject.getTracks().forEach(t => t.stop());
 });
 
+// File Upload
 document.getElementById('fileIn').addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -44,13 +47,15 @@ document.getElementById('fileIn').addEventListener('change', (e) => {
         previewImg.classList.remove('hidden');
         analyzeBtn.classList.remove('hidden');
         document.getElementById('placeholderText').classList.add('hidden');
+        resultDiv.classList.add('hidden');
     };
     reader.readAsDataURL(e.target.files[0]);
 });
 
+// Analysis & Safe Mapping
 analyzeBtn.addEventListener('click', async () => {
     resultDiv.classList.add('hidden');
-    analyzeBtn.innerText = "GENERATING ELABORATE REPORT...";
+    analyzeBtn.innerText = "GENERATING EXPERT REPORT...";
     analyzeBtn.disabled = true;
 
     try {
@@ -64,37 +69,48 @@ analyzeBtn.addEventListener('click', async () => {
         if (res.ok) {
             const txt = data.result;
             
+            // Safe Extractor
             const extract = (label) => {
                 const regex = new RegExp(`${label}:\\s*([\\s\\S]*?)(?=\\n[A-Z\\s]+:|$)`, 'i');
                 const match = txt.match(regex);
                 return match ? match[1].trim() : "Not Detected";
             };
 
-            // Filling Detailed Fields
-            document.getElementById('resYear').innerText = extract("YEAR");
-            document.getElementById('resGrade').innerText = extract("GRADE");
-            document.getElementById('resChassis').innerText = extract("CHASSIS");
-            document.getElementById('resSummary').innerText = extract("SUMMARY");
-            document.getElementById('resInterior').innerText = extract("INTERIOR");
-            document.getElementById('resExterior').innerText = extract("EXTERIOR");
+            // Safe Fill Helper (Fixes the crash)
+            const fill = (id, val) => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = val;
+            };
+
+            // Mapping all IDs correctly
+            fill('resYear', extract("YEAR"));
+            fill('resMake', extract("MAKE"));
+            fill('resModel', extract("MODEL"));
+            fill('resGrade', extract("GRADE"));
+            fill('resChassis', extract("CHASSIS"));
+            fill('resSummary', extract("SUMMARY"));
+            fill('resInterior', extract("INTERIOR"));
+            fill('resExterior', extract("EXTERIOR"));
             
             const verdict = extract("VERDICT");
-            const verdictEl = document.getElementById('resVerdict');
-            const verdictBox = document.getElementById('verdictBox');
-            verdictEl.innerText = verdict;
+            fill('resVerdict', verdict);
 
-            if (verdict.toUpperCase().includes("AVOID") || verdict.toUpperCase().includes("CAUTION") || txt.includes("TAMPERED")) {
-                verdictBox.className = "p-5 rounded-2xl border-2 border-red-600 bg-red-950/30 text-red-400";
-                document.getElementById('flagStatus').classList.remove('hidden');
-            } else {
-                verdictBox.className = "p-5 rounded-2xl border-2 border-emerald-600 bg-emerald-950/30 text-emerald-400";
-                document.getElementById('flagStatus').classList.add('hidden');
+            // Verdict Styling
+            const vBox = document.getElementById('verdictBox');
+            if (vBox) {
+                if (verdict.toUpperCase().includes("AVOID") || verdict.toUpperCase().includes("CAUTION") || txt.includes("TAMPERED")) {
+                    vBox.className = "p-5 rounded-2xl border-2 border-red-600 bg-red-950/30 text-red-400";
+                    document.getElementById('flagStatus')?.classList.remove('hidden');
+                } else {
+                    vBox.className = "p-5 rounded-2xl border-2 border-emerald-600 bg-emerald-950/30 text-emerald-400";
+                    document.getElementById('flagStatus')?.classList.add('hidden');
+                }
             }
 
             resultDiv.classList.remove('hidden');
             window.scrollTo({ top: resultDiv.offsetTop - 20, behavior: 'smooth' });
         }
-    } catch (err) { alert("API Error"); }
+    } catch (err) { alert("API Connection Failed"); }
     finally {
         analyzeBtn.innerText = "ANALYZE SHEET";
         analyzeBtn.disabled = false;
