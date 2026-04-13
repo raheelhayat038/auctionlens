@@ -1,69 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 1.5 Flash AI</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f0f2f5; display: flex; justify-content: center; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { color: #1a73e8; margin-top: 0; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-        input:focus { border-color: #4285f4; }
-        button { padding: 12px 20px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #3367d6; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        #output { background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; min-height: 50px; white-space: pre-wrap; line-height: 1.5; }
-    </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AuctionLens PK</title>
 
-<div class="container">
-    <h2>Gemini 1.5 Flash AI</h2>
-    <div class="input-group">
-        <input type="text" id="promptInput" placeholder="Ask something..." value="Explain gravity like I'm five.">
-        <button id="submitBtn">Ask Gemini</button>
-    </div>
-    <div id="output">Response will appear here...</div>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+
+<body class="bg-slate-950 text-white flex flex-col items-center p-6">
+
+<h1 class="text-3xl font-bold text-blue-400 mb-6">AuctionLens PK</h1>
+
+<div class="bg-slate-900 p-6 rounded-2xl w-full max-w-xl">
+
+    <!-- Upload -->
+    <input type="file" id="fileInput" class="mb-4">
+
+    <!-- Preview -->
+    <img id="preview" class="hidden w-full mb-4 rounded-lg"/>
+
+    <!-- Button -->
+    <button id="analyzeBtn" class="bg-blue-600 px-4 py-2 rounded-lg w-full">
+        Analyze Sheet
+    </button>
+
+    <!-- Result -->
+    <div id="result" class="mt-4 text-sm whitespace-pre-wrap"></div>
+
+    <!-- PDF -->
+    <button id="pdfBtn" class="hidden mt-4 bg-green-600 px-4 py-2 rounded-lg w-full">
+        Download PDF
+    </button>
+
 </div>
 
 <script>
-    const btn = document.getElementById('submitBtn');
-    const output = document.getElementById('output');
-    const input = document.getElementById('promptInput');
 
-    btn.addEventListener('click', async () => {
-        const prompt = input.value;
-        if(!prompt) return;
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const resultDiv = document.getElementById("result");
+const pdfBtn = document.getElementById("pdfBtn");
 
-        btn.disabled = true;
-        output.innerText = "Connecting to backend...";
+let lastResult = "";
 
-        try {
-            // This calls the Vercel Serverless Function we are about to create
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt })
-            });
+fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    preview.src = URL.createObjectURL(file);
+    preview.classList.remove("hidden");
+};
 
-            const data = await response.json();
-            
-            if (data.error) {
-                output.innerText = "Error: " + data.error;
-            } else {
-                // Navigate the JSON response from Gemini
-                const text = data.candidates[0].content.parts[0].text;
-                output.innerText = text;
-            }
-        } catch (err) {
-            output.innerText = "Failed to connect to backend. Make sure you deployed the /api folder.";
-            console.error(err);
-        } finally {
-            btn.disabled = false;
-        }
+analyzeBtn.onclick = async () => {
+
+    const file = fileInput.files[0];
+    if(!file) return alert("Upload image first");
+
+    resultDiv.innerText = "Analyzing... 🔍";
+
+    const base64 = await toBase64(file);
+
+    const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            image: base64,
+            mimeType: file.type
+        })
     });
+
+    const data = await res.json();
+
+    const text = data.choices[0].message.content;
+
+    lastResult = text;
+
+    resultDiv.innerText = text;
+
+    pdfBtn.classList.remove("hidden");
+};
+
+pdfBtn.onclick = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.text("AuctionLens PK Report", 10, 10);
+    doc.text(lastResult, 10, 20);
+
+    doc.save("auction-report.pdf");
+};
+
+function toBase64(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(",")[1]);
+        reader.readAsDataURL(file);
+    });
+}
+
 </script>
 
 </body>
