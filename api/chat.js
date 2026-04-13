@@ -14,18 +14,18 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: "Extract data from Japanese auction sheets. Format: Grade: [val], Chassis: [val], Diagram: [marks]. If Grade is 4.5/5 but damage marks (W/XX) exist, add 'POTENTIALLY TAMPERED'."
+                        content: "Extract auction data. Format exactly as: Year: [val], Make: [val], Model: [val], Grade: [val], Chassis: [val], Notes: [short summary], Diagram: [marks]. If Grade 4.5+ but has W/XX marks, add 'POTENTIALLY TAMPERED'."
                     },
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: "Extract: Grade, Chassis, and Diagram marks." },
+                            { type: "text", text: "Identify Year, Make, Model, Grade, Chassis, Inspector Notes summary, and Diagram marks." },
                             { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
                         ]
                     }
                 ],
                 temperature: 0,
-                max_tokens: 250
+                max_tokens: 500
             })
         });
 
