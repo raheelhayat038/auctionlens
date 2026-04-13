@@ -12,17 +12,18 @@
     <h1 class="text-xl font-black text-blue-500 italic uppercase mb-6 tracking-tighter">AuctionLens PK</h1>
 
     <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl mb-6">
-        <div class="relative border-2 border-dashed border-slate-800 rounded-2xl aspect-video flex items-center justify-center overflow-hidden bg-slate-950 mb-4">
-            <img id="previewImg" class="absolute inset-0 w-full h-full object-contain hidden">
-            <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full hidden"></video>
-            <p id="placeholderText" class="text-slate-500 text-xs">Awaiting Image...</p>
-            <button id="shutter" class="absolute bottom-4 w-12 h-12 bg-white rounded-full border-4 border-red-500 hidden"></button>
+        <div class="relative border-2 border-dashed border-slate-800 rounded-2xl aspect-[3/4] flex items-center justify-center overflow-hidden bg-slate-950 mb-4">
+            <img id="previewImg" class="absolute inset-0 w-full h-full object-contain hidden z-10">
+            <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-10"></video>
+            <p id="placeholderText" class="text-slate-500 text-xs">Awaiting Sheet Scan...</p>
+            <button id="shutter" class="absolute bottom-6 z-20 w-16 h-16 bg-white rounded-full border-4 border-red-500 hidden active:scale-90 transition-transform"></button>
         </div>
+        
         <div class="grid grid-cols-2 gap-2 mb-2">
-            <label class="bg-blue-600 py-3 rounded-xl text-center font-bold text-[10px] uppercase cursor-pointer">Upload <input type="file" id="fileIn" class="hidden"></label>
-            <button id="btnCam" class="bg-emerald-600 py-3 rounded-xl font-bold text-[10px] uppercase">Camera</button>
+            <label class="bg-blue-600 py-4 rounded-xl text-center font-bold text-[10px] uppercase cursor-pointer">Upload <input type="file" id="fileIn" class="hidden"></label>
+            <button id="btnCam" class="bg-emerald-600 py-4 rounded-xl font-bold text-[10px] uppercase">Open Camera</button>
         </div>
-        <button id="analyze" class="hidden w-full bg-white text-black font-black py-3 rounded-xl text-[10px] uppercase tracking-widest">Analyze Now</button>
+        <button id="analyze" class="hidden w-full bg-white text-black font-black py-4 rounded-xl text-[10px] uppercase tracking-widest">Process Sheet</button>
     </div>
 
     <div id="result" class="hidden w-full max-w-md space-y-3 pb-10">
@@ -42,22 +43,22 @@
                     <p id="resGrade" class="text-xs font-bold">-</p>
                 </div>
                 <div class="bg-black/40 p-2 rounded-lg border border-white/5 text-center">
-                    <p class="text-[7px] text-slate-500 uppercase">Make</p>
-                    <p id="resMake" class="text-[10px] font-bold truncate">-</p>
+                    <p class="text-[7px] text-slate-500 uppercase">Chassis</p>
+                    <p id="resChassis" class="text-[9px] font-bold truncate">-</p>
                 </div>
             </div>
 
             <div class="space-y-3">
                 <div>
-                    <p class="text-[8px] text-blue-400 font-bold uppercase mb-1">Executive Summary</p>
+                    <p class="text-[8px] text-blue-400 font-bold uppercase mb-1">Summary</p>
                     <p id="resSummary" class="text-[11px] leading-relaxed text-slate-300"></p>
                 </div>
                 <div>
-                    <p class="text-[8px] text-emerald-400 font-bold uppercase mb-1">Interior & Features</p>
+                    <p class="text-[8px] text-emerald-400 font-bold uppercase mb-1">Interior Condition</p>
                     <p id="resInterior" class="text-[11px] leading-relaxed text-slate-300"></p>
                 </div>
                 <div>
-                    <p class="text-[8px] text-orange-400 font-bold uppercase mb-1">Exterior & Damage</p>
+                    <p class="text-[8px] text-orange-400 font-bold uppercase mb-1">Exterior Condition</p>
                     <p id="resExterior" class="text-[11px] leading-relaxed text-slate-300"></p>
                 </div>
             </div>
