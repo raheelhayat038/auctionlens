@@ -2,7 +2,7 @@
 const auctionData = [
     {
         model: "TOYOTA ALPHARD",
-        chassis: "ANH20-822915",
+        chassis: "ANH20W",
         year: "2012",
         grade: "4.5",
         status: "LIVE",
