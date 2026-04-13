@@ -14,18 +14,24 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: "Extract auction data. FORMAT: Year: [val], Make: [val], Model: [val], Grade: [val], Chassis: [val], Notes: [summary of Japanese inspector comments], Diagram: [W, A, XX marks]. If grade is high (4.5/5) but damage exists, add 'POTENTIALLY TAMPERED'."
+                        content: `You are a Senior Automotive Inspector. Provide a highly detailed report. 
+                        Format exactly:
+                        Year: [val], Make: [val], Model: [val], Grade: [val], Chassis: [val]
+                        Condition Summary: [A 2-3 sentence overview of the car's overall health]
+                        Interior Details: [Detailed bullet points on seats, dash, and smell]
+                        Exterior & Diagram: [Explain every W, A, S, or XX mark found and its severity]
+                        Final Verdict: [Advice on whether to buy or avoid based on tampering/damage]`
                     },
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: "Analyze Year, Make, Model, Grade, Chassis, and Inspector Notes." },
+                            { type: "text", text: "Provide an elaborate inspection report including interior, exterior, and a final purchase verdict." },
                             { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
                         ]
                     }
                 ],
-                temperature: 0.1,
-                max_tokens: 600
+                temperature: 0.2, // Slightly higher for better descriptive language
+                max_tokens: 1000
             })
         });
 
