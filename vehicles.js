@@ -46,23 +46,28 @@ function displayCars() {
     });
 }
 
-// 3. Simple Tab Switching Logic
-const scannerView = document.getElementById('viewScanner'); // Make sure your scanner div has this ID
+// --- Safer Navigation Logic ---
+const scannerView = document.getElementById('viewScanner');
 const vehiclesView = document.getElementById('viewVehicles');
 const navScan = document.getElementById('navScanner');
 const navVeh = document.getElementById('navVehicles');
 
-navScan.addEventListener('click', () => {
-    scannerView.classList.remove('hidden');
-    vehiclesView.classList.add('hidden');
-    navScan.classList.add('text-blue-500'); navScan.classList.remove('text-slate-500');
-    navVeh.classList.add('text-slate-500'); navVeh.classList.remove('text-blue-500');
-});
+// Only add the click event if the button actually exists!
+if (navScan && scannerView) {
+    navScan.addEventListener('click', () => {
+        scannerView.classList.remove('hidden');
+        vehiclesView.classList.add('hidden');
+        navScan.classList.add('text-blue-500');
+        navVeh.classList.remove('text-blue-500');
+    });
+}
 
-navVeh.addEventListener('click', () => {
-    scannerView.classList.add('hidden');
-    vehiclesView.classList.remove('hidden');
-    navVeh.classList.add('text-blue-500'); navVeh.classList.remove('text-slate-500');
-    navScan.classList.add('text-slate-500'); navScan.classList.remove('text-blue-500');
-    displayCars(); // Show the cars
-});
+if (navVeh && vehiclesView) {
+    navVeh.addEventListener('click', () => {
+        scannerView.classList.add('hidden');
+        vehiclesView.classList.remove('hidden');
+        navVeh.classList.add('text-blue-500');
+        navScan.classList.remove('text-blue-500');
+        displayCars(); // Show the cars
+    });
+}
