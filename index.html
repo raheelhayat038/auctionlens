@@ -73,8 +73,7 @@ analyzeBtn.onclick = async () => {
 
     const data = await res.json();
 
-    const text = data.choices[0].message.content;
-
+   const text = data.result || data.error || "No response";
     lastResult = text;
 
     resultDiv.innerText = text;
