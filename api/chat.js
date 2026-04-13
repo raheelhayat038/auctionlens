@@ -14,18 +14,18 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: "Extract auction data. Format exactly as: Year: [val], Make: [val], Model: [val], Grade: [val], Chassis: [val], Notes: [short summary], Diagram: [marks]. If Grade 4.5+ but has W/XX marks, add 'POTENTIALLY TAMPERED'."
+                        content: "Extract auction data. FORMAT: Year: [val], Make: [val], Model: [val], Grade: [val], Chassis: [val], Notes: [summary of Japanese inspector comments], Diagram: [W, A, XX marks]. If grade is high (4.5/5) but damage exists, add 'POTENTIALLY TAMPERED'."
                     },
                     {
                         role: "user",
                         content: [
-                            { type: "text", text: "Identify Year, Make, Model, Grade, Chassis, Inspector Notes summary, and Diagram marks." },
+                            { type: "text", text: "Analyze Year, Make, Model, Grade, Chassis, and Inspector Notes." },
                             { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } }
                         ]
                     }
                 ],
-                temperature: 0,
-                max_tokens: 500
+                temperature: 0.1,
+                max_tokens: 600
             })
         });
 
