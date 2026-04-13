@@ -166,7 +166,7 @@ if(leadForm) {
         const phone = document.getElementById('leadPhone').value;
         const msg = document.getElementById('leadMessage').value;
         
-        const myNumber = "923001234567"; // CHANGE TO YOUR NUMBER
+        const myNumber = "923318484115"; // CHANGE TO YOUR NUMBER
         const text = `*New Inquiry:*%0AName: ${name}%0APhone: ${phone}%0ACar: ${msg}`;
         
         window.open(`https://wa.me/${myNumber}?text=${text}`, '_blank');
