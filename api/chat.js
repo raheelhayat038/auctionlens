@@ -15,7 +15,8 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama-3.2-90b-vision-preview",
+                // Updated to the current production-ready vision model
+                model: "llama-3.2-11b-vision-preview", 
                 messages: [
                     {
                         role: "user",
@@ -32,17 +33,20 @@ export default async function handler(req, res) {
                             }
                         ]
                     }
-                ]
+                ],
+                // Optional: Adjust temperature for more consistent OCR extraction
+                temperature: 0.1 
             })
         });
 
         const data = await response.json();
 
-        console.log("Groq Response:", data);
+        // Log the full response for debugging during the model transition
+        console.log("Groq Response Status:", response.status);
 
         if (!response.ok) {
-            return res.status(500).json({
-                error: data.error?.message || "Groq API failed"
+            return res.status(response.status).json({
+                error: data.error?.message || "Groq API request failed"
             });
         }
 
@@ -51,8 +55,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error("Server crash:", error);
-
+        console.error("Server error:", error);
         return res.status(500).json({
             error: error.message
         });
