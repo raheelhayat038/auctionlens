@@ -87,11 +87,9 @@ analyzeBtn.addEventListener('click', async () => {
                 exterior: extract("EXTERIOR"), verdict: verdict
             };
 
-            // Map UI
             Object.keys(fields).forEach(key => fill('res' + key.charAt(0).toUpperCase() + key.slice(1), fields[key]));
             applyVerdictStyle(verdict);
 
-            // Save & Show
             localStorage.setItem('lastScan', JSON.stringify(fields));
             resultDiv.classList.remove('hidden');
             window.scrollTo({ top: resultDiv.offsetTop - 20, behavior: 'smooth' });
@@ -109,3 +107,21 @@ function applyVerdictStyle(verdict) {
     }
     if(flag) flag.classList.toggle('hidden', !isBad);
 }
+
+// --- 5. WhatsApp Integration Logic ---
+document.getElementById('whatsappBtn').addEventListener('click', () => {
+    const saved = localStorage.getItem('lastScan');
+    if (!saved) return alert("Scan a car first!");
+    
+    const d = JSON.parse(saved);
+    const phoneNumber = "923318484115"; // REPLAC WITH YOUR REAL WHATSAPP NUMBER
+    
+    const message = `*AuctionLens PK Expert Review Request*%0A%0A` +
+        `*Car:* ${d.year} | Grade: ${d.grade}%0A` +
+        `*Chassis:* ${d.chassis}%0A%0A` +
+        `*AI Verdict:* ${d.verdict}%0A%0A` +
+        `*Summary:* ${d.summary}%0A%0A` +
+        `Please provide a human expert second opinion on this sheet.`;
+
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+});
