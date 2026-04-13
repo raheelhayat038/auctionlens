@@ -7,38 +7,33 @@ const shutterBtn = document.getElementById('shutter');
 let activeBase64 = null;
 let activeMime = "image/png";
 
-// Camera Initialization
+// --- Helpers ---
+const fill = (id, val) => {
+    const el = document.getElementById(id);
+    if(el) el.innerText = val;
+};
+
+// --- Camera & Upload (Simplified) ---
 document.getElementById('btnCam').addEventListener('click', async () => {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment", aspectRatio: 0.5625 } 
-        });
-        video.srcObject = stream;
-        video.classList.remove('hidden');
-        previewImg.classList.add('hidden');
-        shutterBtn.classList.remove('hidden');
-        document.getElementById('placeholderText').classList.add('hidden');
-        analyzeBtn.classList.add('hidden');
-        resultDiv.classList.add('hidden');
-    } catch (err) { alert("Camera Access Error"); }
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    video.srcObject = stream;
+    video.classList.remove('hidden');
+    shutterBtn.classList.remove('hidden');
+    previewImg.classList.add('hidden');
+    resultDiv.classList.add('hidden');
 });
 
-// Capture
 shutterBtn.addEventListener('click', () => {
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
     activeBase64 = canvas.toDataURL('image/png').split(',')[1];
     previewImg.src = canvas.toDataURL('image/png');
-    video.classList.add('hidden');
-    previewImg.classList.remove('hidden');
-    shutterBtn.classList.add('hidden');
-    analyzeBtn.classList.remove('hidden');
+    video.classList.add('hidden'); previewImg.classList.remove('hidden');
+    shutterBtn.classList.add('hidden'); analyzeBtn.classList.remove('hidden');
     video.srcObject.getTracks().forEach(t => t.stop());
 });
 
-// File Upload
 document.getElementById('fileIn').addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -46,16 +41,15 @@ document.getElementById('fileIn').addEventListener('change', (e) => {
         previewImg.src = ev.target.result;
         previewImg.classList.remove('hidden');
         analyzeBtn.classList.remove('hidden');
-        document.getElementById('placeholderText').classList.add('hidden');
         resultDiv.classList.add('hidden');
     };
     reader.readAsDataURL(e.target.files[0]);
 });
 
-// Analysis & Safe Mapping
+// --- Main Analysis ---
 analyzeBtn.addEventListener('click', async () => {
     resultDiv.classList.add('hidden');
-    analyzeBtn.innerText = "GENERATING EXPERT REPORT...";
+    analyzeBtn.innerText = "EXTRACTING...";
     analyzeBtn.disabled = true;
 
     try {
@@ -69,20 +63,12 @@ analyzeBtn.addEventListener('click', async () => {
         if (res.ok) {
             const txt = data.result;
             
-            // Safe Extractor
             const extract = (label) => {
-                const regex = new RegExp(`${label}:\\s*([\\s\\S]*?)(?=\\n[A-Z\\s]+:|$)`, 'i');
-                const match = txt.match(regex);
-                return match ? match[1].trim() : "Not Detected";
+                const regex = new RegExp(`${label}:\\s*([\\s\\S]*?)(?=\\n[A-Z]+:|$)`, 'i');
+                return txt.match(regex)?.[1]?.trim() || "-";
             };
 
-            // Safe Fill Helper (Fixes the crash)
-            const fill = (id, val) => {
-                const el = document.getElementById(id);
-                if(el) el.innerText = val;
-            };
-
-            // Mapping all IDs correctly
+            // Filling Data
             fill('resYear', extract("YEAR"));
             fill('resMake', extract("MAKE"));
             fill('resModel', extract("MODEL"));
@@ -95,24 +81,17 @@ analyzeBtn.addEventListener('click', async () => {
             const verdict = extract("VERDICT");
             fill('resVerdict', verdict);
 
-            // Verdict Styling
+            // UI Styling
             const vBox = document.getElementById('verdictBox');
             if (vBox) {
-                if (verdict.toUpperCase().includes("AVOID") || verdict.toUpperCase().includes("CAUTION") || txt.includes("TAMPERED")) {
-                    vBox.className = "p-5 rounded-2xl border-2 border-red-600 bg-red-950/30 text-red-400";
-                    document.getElementById('flagStatus')?.classList.remove('hidden');
-                } else {
-                    vBox.className = "p-5 rounded-2xl border-2 border-emerald-600 bg-emerald-950/30 text-emerald-400";
-                    document.getElementById('flagStatus')?.classList.add('hidden');
-                }
+                const isBad = verdict.toUpperCase().includes("AVOID") || verdict.toUpperCase().includes("CAUTION");
+                vBox.className = isBad ? "p-4 rounded-2xl border-2 border-red-600 bg-red-900/20 text-red-400" : "p-4 rounded-2xl border-2 border-emerald-600 bg-emerald-900/20 text-emerald-400";
+                document.getElementById('flagStatus')?.classList.toggle('hidden', !isBad);
             }
 
             resultDiv.classList.remove('hidden');
             window.scrollTo({ top: resultDiv.offsetTop - 20, behavior: 'smooth' });
         }
-    } catch (err) { alert("API Connection Failed"); }
-    finally {
-        analyzeBtn.innerText = "ANALYZE SHEET";
-        analyzeBtn.disabled = false;
-    }
+    } catch (err) { alert("Error connecting to server."); }
+    finally { analyzeBtn.innerText = "ANALYZE SHEET"; analyzeBtn.disabled = false; }
 });
